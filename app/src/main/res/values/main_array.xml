@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="main_arr">
+        <item>Каталог химии</item>
+        <item>Заказы покупателей</item>
+        <item>Заказы поставщикам</item>
+        <item>Заявки на доставку</item>
+        <item>Документы</item>
+        <item>Фотографии</item>
+    </string-array>
+    <string-array name="catalog_arr">
+        <item>Техническая химия</item>
+        <item>Импортная химия</item>
+        <item>Посуда</item>
+        <item>Стандарт титры</item>
+        <item>Прочие</item>
+    </string-array>
+    <string-array name="camera_arr">
+        <item>Сфотографировать</item>
+    </string-array>
+</resources>
