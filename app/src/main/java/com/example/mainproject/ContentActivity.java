@@ -35,7 +35,7 @@ public class ContentActivity extends AppCompatActivity  {
         switch (category){
             case 0:
                 if(position == 5){
-                    Intent intent = new Intent(ContentActivity.this, GalleryImg.class );
+                    Intent intent = new Intent(ContentActivity.this, CameraActivity.class );
                     startActivity(intent);
                 }else {
                     text_content.setText(array_content[position]);

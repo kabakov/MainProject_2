@@ -22,6 +22,15 @@
         android:layout_height="300dp"
         android:src="@drawable/click_to_upload"/>
 
+    <EditText
+        android:id="@+id/textNomen"
+        android:layout_width="160dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:inputType="phone"
+        android:background="#F1F1F1"
+        android:textSize="24sp" />
+
     <Button
         android:id="@+id/btnUpload"
         android:layout_width="wrap_content"

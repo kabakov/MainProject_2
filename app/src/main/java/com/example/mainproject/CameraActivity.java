@@ -16,7 +16,9 @@ import android.provider.MediaStore;
 import android.util.Base64;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -35,9 +37,11 @@ public class CameraActivity extends AppCompatActivity {
 
     Bitmap bitmap;
     Button btnCamera;
+    EditText textNomen;
     private static final int REQUEST_CODE = 22;
     ImageView imageView;
-    private String myURL = "http://kabakovisg.temp.swtest.ru/android/uploadImgMySql.php";
+    //private String myURL = "http://kabakovisg.temp.swtest.ru/android/uploadImgMySql.php";
+    private String myURL = "https://online.csdb.ru/uploadImg_android.php";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,6 +49,7 @@ public class CameraActivity extends AppCompatActivity {
         imageView = findViewById(R.id.clickToUploadImg);
         Button button = findViewById(R.id.btnUpload);
         btnCamera = findViewById(R.id.btnCamera);
+        textNomen = findViewById(R.id.textNomen);
 
         btnCamera.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -91,7 +96,8 @@ public class CameraActivity extends AppCompatActivity {
                     final String base64Image = Base64.encodeToString(bytes, Base64.DEFAULT);
                     RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
                     String url = myURL;
-
+                    String nomenText = textNomen.getText().toString();
+                    final String nomen = nomenText.substring(0, Math.min(nomenText.length(), 6)) + "CS";
                     StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                             new Response.Listener<String>() {
                                 @Override
@@ -110,6 +116,7 @@ public class CameraActivity extends AppCompatActivity {
                         protected Map<String, String> getParams(){
                             Map<String, String> paramV = new HashMap<>();
                             paramV.put("image", base64Image);
+                            paramV.put("nomen", nomen);
                             return paramV;
                         }
                     };
