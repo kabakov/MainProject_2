@@ -14,6 +14,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -157,6 +159,12 @@ public class CameraActivity extends AppCompatActivity {
 
     }
 
+    public static Bitmap rotateImage(Bitmap source, float angle) {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(angle);
+        return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(),
+                matrix, true);
+    }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if(requestCode == REQUEST_CODE && resultCode == RESULT_OK)
@@ -164,7 +172,54 @@ public class CameraActivity extends AppCompatActivity {
             //bitmap = (Bitmap) data.getExtras().get("data");
             //imageView.setImageBitmap(bitmap);
 
-            bitmap = BitmapFactory.decodeFile(currentPhotoPath);
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            bitmap = BitmapFactory.decodeFile(currentPhotoPath, options);
+
+            int h = 1000;
+            int w = 1000;
+
+            int heightRatio = (int)Math.ceil(options.outHeight/(float)h);
+            int widthRatio = (int)Math.ceil(options.outWidth/(float)w);
+
+            if (heightRatio > 1 || widthRatio > 1)
+            {
+                if (heightRatio > widthRatio){
+                    options.inSampleSize = widthRatio;
+                } else {
+                    options.inSampleSize = heightRatio;
+                }
+            }
+
+            options.inJustDecodeBounds = false;
+            //options.inSampleSize = scaleFactor;
+            options.inPurgeable = true;
+
+            bitmap = BitmapFactory.decodeFile(currentPhotoPath, options);
+
+            ExifInterface ei = null;
+            try {
+                ei = new ExifInterface(currentPhotoPath);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION,
+                    ExifInterface.ORIENTATION_UNDEFINED);
+            switch(orientation) {
+                case ExifInterface.ORIENTATION_ROTATE_90:
+                    bitmap = rotateImage(bitmap, 90);
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_180:
+                    bitmap = rotateImage(bitmap, 180);
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_270:
+                    bitmap = rotateImage(bitmap, 270);
+                    break;
+                case ExifInterface.ORIENTATION_NORMAL:
+                default:
+                    bitmap = bitmap;
+            }
+
             imageView.setImageBitmap(bitmap);
 
         }else {
@@ -172,5 +227,7 @@ public class CameraActivity extends AppCompatActivity {
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
+
+
 
 }
