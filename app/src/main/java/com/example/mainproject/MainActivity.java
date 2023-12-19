@@ -15,6 +15,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.Toolbar;
 
 
+import com.example.mainproject.settings.settingsActivity;
 import com.google.android.material.navigation.NavigationView;
 
 import androidx.annotation.NonNull;
@@ -74,6 +75,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         getMenuInflater().inflate(R.menu.main, menu);
         toolbar.setTitle(R.string.Main);
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+
+        int id = item.getItemId();
+        if(id == R.id.action_settings){
+            Intent i = new Intent(MainActivity.this, settingsActivity.class);
+            startActivity(i);
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

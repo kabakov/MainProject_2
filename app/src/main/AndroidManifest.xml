@@ -3,9 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
-
 
     <application
         android:allowBackup="true"
@@ -18,10 +17,18 @@
         android:theme="@style/Theme.MainProject"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
+        <activity
+            android:name=".PhotoCatalog"
+            android:exported="false" />
+        <activity
+            android:name=".catalog.PhotoCatalog"
+            android:exported="false"
+            android:label="@string/title_activity_photo_catalog"
+            android:theme="@style/Theme.MainProject" />
 
         <provider
-            android:authorities="com.example.mainproject.fileprovider"
             android:name="androidx.core.content.FileProvider"
+            android:authorities="com.example.mainproject.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
@@ -31,6 +38,9 @@
 
         <activity
             android:name=".GalleryImg"
+            android:exported="false" />
+        <activity
+            android:name=".settings.settingsActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"

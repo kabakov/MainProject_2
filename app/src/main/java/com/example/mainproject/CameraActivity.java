@@ -165,6 +165,21 @@ public class CameraActivity extends AppCompatActivity {
         return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(),
                 matrix, true);
     }
+
+    public static Bitmap cropToSquare(Bitmap bitmap){
+        int width  = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        int newWidth = (height > width) ? width : height;
+        int newHeight = (height > width)? height - ( height - width) : height;
+        int cropW = (width - height) / 2;
+        cropW = (cropW < 0)? 0: cropW;
+        int cropH = (height - width) / 2;
+        cropH = (cropH < 0)? 0: cropH;
+        Bitmap cropImg = Bitmap.createBitmap(bitmap, cropW, cropH, newWidth, newHeight);
+
+        return cropImg;
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if(requestCode == REQUEST_CODE && resultCode == RESULT_OK)
@@ -179,8 +194,8 @@ public class CameraActivity extends AppCompatActivity {
             int h = 1000;
             int w = 1000;
 
-            int heightRatio = (int)Math.ceil(options.outHeight/(float)h);
-            int widthRatio = (int)Math.ceil(options.outWidth/(float)w);
+            int heightRatio = (int)Math.floor(options.outHeight/(float)h);
+            int widthRatio = (int)Math.floor(options.outWidth/(float)w);
 
             if (heightRatio > 1 || widthRatio > 1)
             {
@@ -192,10 +207,11 @@ public class CameraActivity extends AppCompatActivity {
             }
 
             options.inJustDecodeBounds = false;
-            //options.inSampleSize = scaleFactor;
             options.inPurgeable = true;
 
             bitmap = BitmapFactory.decodeFile(currentPhotoPath, options);
+
+            bitmap = cropToSquare(bitmap);
 
             ExifInterface ei = null;
             try {
