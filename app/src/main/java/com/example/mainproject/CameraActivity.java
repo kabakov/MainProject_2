@@ -54,6 +54,7 @@ public class CameraActivity extends AppCompatActivity {
     //private String myURL = "http://kabakovisg.temp.swtest.ru/android/uploadImgMySql.php";
     private String myURL = "https://online.csdb.ru/uploadImg_android.php";
 
+    private String art = "";
     private String currentPhotoPath;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +64,14 @@ public class CameraActivity extends AppCompatActivity {
         Button button = findViewById(R.id.btnUpload);
         btnCamera = findViewById(R.id.btnCamera);
         textNomen = findViewById(R.id.textNomen);
+
+
+        Bundle bundle = getIntent().getExtras();
+        if(bundle != null) {
+            art = bundle.getString("art");
+            textNomen.setText(art);
+        }
+
 
         btnCamera.setOnClickListener(new View.OnClickListener() {
             @Override

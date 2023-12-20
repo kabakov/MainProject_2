@@ -2,8 +2,8 @@ package com.example.mainproject;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -15,6 +15,7 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.mainproject.databinding.ActivityMainBinding;
 import com.example.mainproject.databinding.ActivityPhotoCatalogBinding;
 
 import org.json.JSONArray;
@@ -35,26 +36,26 @@ import java.util.Iterator;
 import java.util.List;
 
 public class PhotoCatalog extends AppCompatActivity {
-
+    private ListView list;
     ActivityPhotoCatalogBinding binding;
+    ArrayList<String> snameList;
+    HashMap<String, String> hashMap;
+    List<HashMap<String, String>> listItems;
+    ArrayAdapter<String> listAdapter;
 
+    SimpleAdapter adapter;
     JSONArray jsonArray;
     Handler mainHandler = new Handler();
-    private ProgressDialog progressDialog;
+    ProgressDialog progressDialog;
 
     String err;
-
-    HashMap<String, String> resultdata;
-    List<HashMap<String, String>> listDate;
-    SimpleAdapter adapter;
-    private ListView listView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityPhotoCatalogBinding.inflate(getLayoutInflater());
-        listView = findViewById(R.id.userList);
         setContentView(binding.getRoot());
+        list = findViewById(R.id.userList);
         initListData();
 
         binding.fetchData.setOnClickListener(new View.OnClickListener() {
@@ -64,28 +65,27 @@ public class PhotoCatalog extends AppCompatActivity {
             }
         });
 
-
-        binding.userList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String currentline = listDate.get(position).get("Second line");
-                String currenttitle = listDate.get(position).get("First line");
-                Intent intent = new Intent(PhotoCatalog.this, PhotoCatalogSection.class );
-                intent.putExtra("key", currentline);
-                intent.putExtra("title", currenttitle);
-                startActivity(intent);
+                Toast.makeText(getApplicationContext(), ((TextView) view).getText(),
+                        Toast.LENGTH_SHORT).show();
             }
         });
-
     }
 
     private void initListData() {
 
-        listDate = new ArrayList<>();
-        adapter = new SimpleAdapter(this, listDate, R.layout.list_item,
-                new String[] {"First line", "Second line"}, new int[] {R.id.text1, R.id.text2});
+        snameList = new ArrayList<>();
+        listAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,snameList);
+        binding.userList.setAdapter(listAdapter);
 
-        binding.userList.setAdapter(adapter);
+//        listItems = new ArrayList<>();
+//        adapter = new SimpleAdapter(this, listItems, R.layout.list_item,
+//                new String[]{"First line", "Second Line"},
+//                new int[]{R.id.text1, R.id.text2});
+//        list.setAdapter(adapter);
+
     }
 
     class fetchData extends Thread {
@@ -117,6 +117,9 @@ public class PhotoCatalog extends AppCompatActivity {
 
                 jsonArray = new JSONArray();
 
+                snameList.clear();
+                hashMap.clear();
+
                 if(!data.isEmpty()){
                     JSONObject jsonObject = new JSONObject(data);
                     Iterator x = jsonObject.keys();
@@ -125,14 +128,16 @@ public class PhotoCatalog extends AppCompatActivity {
                         String key = (String) x.next();
                         jsonArray.put(jsonObject.get(key));
                     }
-                    listDate.clear();
+
                     for (int i=0; i < jsonArray.length(); i++) {
                         try {
                             if(i==0) continue;
-                            resultdata = new HashMap<>();
-                            resultdata.put("First line", "" + jsonArray.getJSONArray(i).getString(0) + " ["+ jsonArray.getJSONArray(i).getString(2) +"]");
-                            resultdata.put("Second line", "" + jsonArray.getJSONArray(i).getString(1));
-                            listDate.add(resultdata);
+//                            HashMap<String, String> resultMap = new HashMap<>();
+//                            resultMap.put("First line", jsonArray.getJSONArray(i).getString(0) + " ["+ jsonArray.getJSONArray(i).getString(2) +"]");
+//                            resultMap.put("Second Line", jsonArray.getJSONArray(i).getString(1));
+//                            listItems.add(resultMap);
+
+                            snameList.add(jsonArray.getJSONArray(i).getString(0));
                         } catch (JSONException e) {
                             throw new RuntimeException(e);
                         }
@@ -149,11 +154,14 @@ public class PhotoCatalog extends AppCompatActivity {
             }
 
             mainHandler.post(new Runnable() {
+
+                @SuppressLint("SuspiciousIndentation")
                 @Override
                 public void run() {
                     if(progressDialog.isShowing())
-                    progressDialog.dismiss();
-                    adapter.notifyDataSetChanged();
+                        progressDialog.dismiss();
+                        listAdapter.notifyDataSetChanged();
+                        //adapter.notifyDataSetChanged();
 
                 }
             });

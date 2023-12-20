@@ -2,20 +2,19 @@ package com.example.mainproject;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.mainproject.databinding.ActivityPhotoCatalogBinding;
+import com.example.mainproject.databinding.ActivityPhotoCatalogSectionBinding;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -25,7 +24,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -34,45 +32,47 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-public class PhotoCatalog extends AppCompatActivity {
+public class PhotoCatalogSection extends AppCompatActivity {
 
-    ActivityPhotoCatalogBinding binding;
+    private String key = "";
+    private JSONArray jsonArray;
 
-    JSONArray jsonArray;
-    Handler mainHandler = new Handler();
+    private Handler sectionHandler = new Handler();
     private ProgressDialog progressDialog;
-
-    String err;
-
-    HashMap<String, String> resultdata;
-    List<HashMap<String, String>> listDate;
-    SimpleAdapter adapter;
+    private ActivityPhotoCatalogSectionBinding binding;
     private ListView listView;
+
+    private HashMap<String, String> resultdata;
+    private List<HashMap<String, String>> listDate;
+    private SimpleAdapter adapter;
+
+    private String err;
+    private  TextView textView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = ActivityPhotoCatalogBinding.inflate(getLayoutInflater());
+        setContentView(R.layout.activity_photo_catalog_section);
+
+        Bundle bundle = getIntent().getExtras();
+        key = bundle.getString("key");
+
+        binding = ActivityPhotoCatalogSectionBinding.inflate(getLayoutInflater());
         listView = findViewById(R.id.userList);
+        textView = findViewById(R.id.textView2);
+
+        binding.textView2.setText(bundle.getString("title"));
         setContentView(binding.getRoot());
         initListData();
 
-        binding.fetchData.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new fetchData().start();
-            }
-        });
-
+        new PhotoCatalogSection.fetchData().start();
 
         binding.userList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String currentline = listDate.get(position).get("Second line");
-                String currenttitle = listDate.get(position).get("First line");
-                Intent intent = new Intent(PhotoCatalog.this, PhotoCatalogSection.class );
-                intent.putExtra("key", currentline);
-                intent.putExtra("title", currenttitle);
+                String currentarticle = listDate.get(position).get("First line");
+                Intent intent = new Intent(PhotoCatalogSection.this, CameraActivity.class );
+                intent.putExtra("art", currentarticle);
                 startActivity(intent);
             }
         });
@@ -84,20 +84,19 @@ public class PhotoCatalog extends AppCompatActivity {
         listDate = new ArrayList<>();
         adapter = new SimpleAdapter(this, listDate, R.layout.list_item,
                 new String[] {"First line", "Second line"}, new int[] {R.id.text1, R.id.text2});
-
         binding.userList.setAdapter(adapter);
+
     }
 
-    class fetchData extends Thread {
-
+    public class fetchData extends Thread {
         String data = "";
+
         @Override
         public void run() {
-
-            mainHandler.post(new Runnable() {
+            sectionHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    progressDialog = new ProgressDialog(PhotoCatalog.this);
+                    progressDialog = new ProgressDialog(PhotoCatalogSection.this);
                     progressDialog.setMessage("Загрузка данных");
                     progressDialog.setCancelable(false);
                     progressDialog.show();
@@ -105,7 +104,7 @@ public class PhotoCatalog extends AppCompatActivity {
             });
 
             try {
-                URL url = new URL("https://online.csdb.ru/module/api/api.php?type=GetPhotoCatalog");
+                URL url = new URL("https://online.csdb.ru/module/api/api.php?type=GetPhotoNomen&catalog="+key);
                 HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
                 InputStream inputStream = httpURLConnection.getInputStream();
                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
@@ -130,8 +129,8 @@ public class PhotoCatalog extends AppCompatActivity {
                         try {
                             if(i==0) continue;
                             resultdata = new HashMap<>();
-                            resultdata.put("First line", "" + jsonArray.getJSONArray(i).getString(0) + " ["+ jsonArray.getJSONArray(i).getString(2) +"]");
-                            resultdata.put("Second line", "" + jsonArray.getJSONArray(i).getString(1));
+                            resultdata.put("First line", "" + jsonArray.getJSONArray(i).getString(0));
+                            resultdata.put("Second line", "" + jsonArray.getJSONArray(i).getString(1) + " ["+ jsonArray.getJSONArray(i).getString(2) +"]");
                             listDate.add(resultdata);
                         } catch (JSONException e) {
                             throw new RuntimeException(e);
@@ -147,17 +146,15 @@ public class PhotoCatalog extends AppCompatActivity {
             } catch (JSONException e) {
                 throw new RuntimeException(e);
             }
-
-            mainHandler.post(new Runnable() {
+            sectionHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     if(progressDialog.isShowing())
-                    progressDialog.dismiss();
+                        progressDialog.dismiss();
                     adapter.notifyDataSetChanged();
 
                 }
             });
-
         }
     }
 }
